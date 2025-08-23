@@ -1,0 +1,17 @@
+@layer reset, base, tokens, recipes, utilities;
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 8px;
+}
+.height_light_words {
+  font-size: 14px;
+  color: #ea4335;
+  background-color: rgba(255, 255, 255, 0);
+  padding: 0;
+}
