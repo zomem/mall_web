@@ -9,6 +9,7 @@ import Paths from "@/pages/manage/system/Paths";
 import Role from "@/pages/manage/system/Role";
 import ModuleSwitch from "@/pages/manage/system/ModuleSwitch";
 import Feedback from "@/pages/manage/user/Feedback";
+import WithdrawRequest from "@/pages/manage/user/WithdrawRequest";
 import ProductCat from "@/pages/manage/mallProduct/ProductCat";
 import ProductAttr from "@/pages/manage/mallProduct/ProductAttr";
 import Product from "@/pages/manage/mallProduct/Product";
@@ -28,6 +29,7 @@ import SaleRecords from "@/pages/manage/sales/SaleRecords";
 export type PathKeyList =
   | "user/AllUsers"
   | "user/Feedback"
+  | "user/WithdrawRequest"
   | "user/Roles"
   | "user/RoleCredential"
   | "user/RolesAdd"
@@ -61,6 +63,7 @@ const GetPath = ({ path }: GetPathProps): JSX.Element => {
         {
           "user/AllUsers": <AllUsers />,
           "user/Feedback": <Feedback />,
+          "user/WithdrawRequest": <WithdrawRequest />,
           "user/Roles": <Roles />,
           "user/RoleCredential": <RoleCredential />,
           "user/RolesAdd": <RolesAdd />,

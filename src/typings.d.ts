@@ -79,3 +79,13 @@ interface Credential {
   status: number;
   created_at: string;
 }
+
+interface WithdrawRequest {
+  id: number;
+  avatar_url: string;
+  nickname: string;
+  req_amount: number;
+  status: number;
+  created_at: string;
+  updated_at: string;
+}

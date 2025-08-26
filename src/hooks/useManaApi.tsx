@@ -333,3 +333,26 @@ export const useQueAnsList = (form_id: number, page: number, size: number) => {
 
   return info;
 };
+
+export const useWithdrawRequestList = (
+  page: number,
+  size: number,
+  status: number | string,
+  refresh: number = 0
+) => {
+  const [info, setInfo] = useState<PagData<WithdrawRequest[]>>({
+    list: [],
+    total: 0,
+  });
+  useEffect(() => {
+    if (page > 0) {
+      get(
+        "/manage/user/withdraw_req/list/" + status + "/" + page + "/" + size
+      ).then((res) => {
+        setInfo(res.objects);
+      });
+    }
+  }, [page, size, status, refresh]);
+
+  return info;
+};

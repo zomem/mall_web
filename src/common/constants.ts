@@ -57,6 +57,14 @@ export const NormalStatusOptions = [
   { label: "已上线", value: 2 },
   { label: "已下架", value: 3 },
 ];
+// 提现状态
+export const ReqAmountStatusOptions = [
+  { label: "未通过", value: 0 },
+  { label: "待审核", value: 1 },
+  { label: "已通过", value: 2 },
+  { label: "提现成功", value: 3 },
+  { label: "提现失败", value: 4 },
+];
 
 // 物流状态
 export enum DeliveryType {

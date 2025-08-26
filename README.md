@@ -29,7 +29,7 @@
 - **状态管理**: React Context API
 - **HTTP 客户端**: [Axios](https://axios-http.com/)
 
-## 🏗️ 项目结构
+## 项目结构
 
 ```
 mall_web/
