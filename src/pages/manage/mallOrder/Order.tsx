@@ -14,6 +14,7 @@ import {
   Input,
   Descriptions,
   Divider,
+  theme,
 } from "antd";
 import { Div } from "@/components/panda/css";
 
@@ -22,7 +23,7 @@ import Card from "@/components/manage/Card";
 
 import { get, post } from "@/common/fetch";
 import { OrderItemStatus, OrderStatus, DeliveryType } from "@/common/constants";
-import { BaseContext } from "@/common/context";
+import { BaseContext, ThemeContext } from "@/common/context";
 import { isDoDelivery, getDeliveryName } from "../utils/utils";
 
 interface OrderProduct {
@@ -77,6 +78,8 @@ function Order() {
   const [size, setSize] = useState<number>(20);
   const [page, setPage] = useState(1);
   const base = useContext(BaseContext);
+  const { themeCtx } = useContext(ThemeContext);
+  const { token } = theme.useToken();
 
   const [selectSn, setSelectSn] = useState<OrderInfo | null>(null);
 
@@ -232,6 +235,82 @@ function Order() {
   // 到店核销
   function onStoreWriteOff() {}
 
+  // 处理退款
+  function handleRefund(order_sn: string) {
+    Modal.confirm({
+      title: "确认退款",
+      content: `确定要对订单 ${order_sn} 进行退款操作吗？`,
+      styles: {
+        mask: {
+          backgroundColor:
+            themeCtx === "dark" ? "rgba(0, 0, 0, 0.65)" : "rgba(0, 0, 0, 0.45)",
+        },
+        content: {
+          backgroundColor: token.colorBgElevated,
+          color: token.colorText,
+        },
+        header: {
+          backgroundColor: token.colorBgElevated,
+          color: token.colorText,
+        },
+      },
+      onOk() {
+        post("/manage/mall/order/refund", {
+          order_sn: order_sn,
+        })
+          .then((res) => {
+            if (res.status === 1) {
+              message.success(res.message || "退款成功");
+              setR((p) => p + 1); // 刷新列表
+            } else {
+              message.error(res.message || "退款失败");
+            }
+          })
+          .catch(() => {
+            message.error("退款请求失败");
+          });
+      },
+    });
+  }
+
+  // 拒绝退款
+  function handleRefuseRefund(order_sn: string) {
+    Modal.confirm({
+      title: "拒绝退款",
+      content: `确定要拒绝订单 ${order_sn} 的退款申请吗？`,
+      styles: {
+        mask: {
+          backgroundColor:
+            themeCtx === "dark" ? "rgba(0, 0, 0, 0.65)" : "rgba(0, 0, 0, 0.45)",
+        },
+        content: {
+          backgroundColor: token.colorBgElevated,
+          color: token.colorText,
+        },
+        header: {
+          backgroundColor: token.colorBgElevated,
+          color: token.colorText,
+        },
+      },
+      onOk() {
+        post("/manage/mall/order/refuse_refund", {
+          order_sn: order_sn,
+        })
+          .then((res) => {
+            if (res.status === 1) {
+              message.success(res.message || "拒绝退款成功");
+              setR((p) => p + 1); // 刷新列表
+            } else {
+              message.error(res.message || "拒绝退款失败");
+            }
+          })
+          .catch(() => {
+            message.error("拒绝退款请求失败");
+          });
+      },
+    });
+  }
+
   // 列表
   const columns = [
     {
@@ -305,7 +384,11 @@ function Order() {
             {
               "1": <Badge status="processing" text="待支付" />,
               "2": <Badge status="success" text="已支付" />,
-              "0": <Badge status="error" text="取消支付" />,
+              "0": <Badge color="default" text="取消支付" />,
+              "4": <Badge color="red" text="申请退款" />,
+              "5": <Badge color="geekblue" text="已退款" />,
+              "6": <Badge color="purple" text="退款中" />,
+              "7": <Badge color="purple" text="拒绝退款" />,
             }[`${i.status}`]
           }
         </div>
@@ -315,6 +398,18 @@ function Order() {
       title: "备注",
       dataIndex: "notes",
       key: "notes",
+      width: 200,
+    },
+    {
+      title: "申请退款原因",
+      dataIndex: "reason",
+      key: "reason",
+      width: 200,
+    },
+    {
+      title: "微信交易id",
+      dataIndex: "transaction_id",
+      key: "transaction_id",
       width: 200,
     },
     {
@@ -332,40 +427,70 @@ function Order() {
         <div>{getDeliveryName(base.delivery_type, i.delivery_type || "")}</div>
       ),
     },
-    {
-      title: "商品状态",
-      dataIndex: "status",
-      key: "status",
-      width: 120,
-      render: (r: OrderInfo[], i: OrderInfo) => (
-        <div>
-          {i.status == OrderStatus.Paid ? (
-            <div>
-              {
-                // @ts-ignore
-                {
-                  "-1": <Tag color="default">全部</Tag>,
-                  "0": <Tag color="red">待发货</Tag>,
-                  "1": <Tag color="orange">待收货</Tag>,
-                  "2": <Tag color="green">已完成</Tag>,
-                  "3": <Tag color="blue">已评价</Tag>,
-                  "4": <Tag color="purple">申请退货</Tag>,
-                  "5": <Tag color="default">已退货</Tag>,
-                }[`${screen.item_status}`]
-              }
-            </div>
-          ) : (
-            <div>-</div>
-          )}
-        </div>
-      ),
-    },
+    // {
+    //   title: "商品总状态",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   width: 120,
+    //   render: (r: OrderInfo[], i: OrderInfo) => (
+    //     <div>
+    //       {i.status == OrderStatus.Paid ? (
+    //         <div>
+    //           {
+    //             // @ts-ignore
+    //             {
+    //               "-1": <Tag color="default">全部</Tag>,
+    //               "0": <Tag color="red">待发货</Tag>,
+    //               "1": <Tag color="orange">待收货</Tag>,
+    //               "2": <Tag color="green">已完成</Tag>,
+    //               "3": <Tag color="blue">已评价</Tag>,
+    //               "4": <Tag color="purple">申请退货</Tag>,
+    //               "5": <Tag color="default">已退货</Tag>,
+    //               "6": <Tag color="default">退款中</Tag>,
+    //             }[`${screen.item_status}`]
+    //           }
+    //         </div>
+    //       ) : (
+    //         <div>-</div>
+    //       )}
+    //     </div>
+    //   ),
+    // },
     {
       title: "时间",
       dataIndex: "created_at",
       key: "created_at",
       width: 180,
       render: (r: any, i: any) => <div>{i.created_at}</div>,
+    },
+    {
+      title: "操作",
+      dataIndex: "operation",
+      key: "operation",
+      width: 140,
+      render: (_r: any, record: OrderInfo) => (
+        <>
+          {record.status === 4 && (
+            <>
+              <Button
+                type="primary"
+                size="small"
+                onClick={() => handleRefund(record.order_sn)}
+                style={{ marginRight: 8 }}
+              >
+                退款
+              </Button>
+              <Button
+                danger
+                size="small"
+                onClick={() => handleRefuseRefund(record.order_sn)}
+              >
+                拒绝
+              </Button>
+            </>
+          )}
+        </>
+      ),
     },
   ];
 
@@ -483,6 +608,8 @@ function Order() {
                     "3": <Tag color="blue">已评价</Tag>,
                     "4": <Tag color="purple">申请退货</Tag>,
                     "5": <Tag color="default">已退货</Tag>,
+                    "6": <Tag color="geekblue">退款中</Tag>,
+                    "7": <Tag color="yellow">拒绝退款</Tag>,
                   }[`${i.status}`]
                 }
               </div>
@@ -539,12 +666,16 @@ function Order() {
           onChange={(v) => {
             setSelectRows([]);
             setSelectList([]);
-            setScreen((p) => ({ ...p, status: v }));
+            setScreen((_) => ({ status: v, item_status: -1 }));
           }}
           options={[
             { label: "待支付", value: 1 },
             { label: "已支付", value: 2 },
             { label: "取消支付", value: 0 },
+            { label: "申请退款", value: 4 },
+            { label: "已退款", value: 5 },
+            { label: "退款中", value: 6 },
+            { label: "拒绝退款", value: 7 },
           ]}
         />
         {screen.status == 2 && (
@@ -564,6 +695,8 @@ function Order() {
               { label: "已评价", value: 3 },
               { label: "申请退货", value: 4 },
               { label: "已退货", value: 5 },
+              { label: "退款中", value: 6 },
+              { label: "拒绝退款", value: 7 },
             ]}
           />
         )}
